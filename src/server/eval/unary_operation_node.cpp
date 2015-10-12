@@ -36,7 +36,7 @@ UnaryOperationNode::UnaryOperationNode(op::UnaryOperationEnum operation, const n
 string UnaryOperationNode::eval(GeoObject* obj) const
 {
 	// This is needed beacase of MSVC
-	assert(false);
+        return "";
 }
 
 
