@@ -190,8 +190,12 @@ add_custom_command(
     COMMAND alacarte-importer "${CMAKE_CURRENT_SOURCE_DIR}/tests/data/input/renderer_test.osm" "${CMAKE_CURRENT_SOURCE_DIR}/tests/data/input/renderer_test.carte"
 )
 
+add_custom_target(make-carto-files
+    DEPENDS alacarte-importer ${test_files}
+)
+
 add_custom_target(tests
-    DEPENDS alacarte-importer unitTests_server unitTests_importer unitTests_general unitTests_parser unitTests_utils ${test_files}
+    DEPENDS make-carto-files unitTests_server unitTests_importer unitTests_general unitTests_parser unitTests_utils
 )
 
 add_custom_target(lint
