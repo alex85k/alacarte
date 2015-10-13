@@ -10,6 +10,10 @@
 #include "server/parser/color_grammar.hpp"
 #include "server/parser/parser_logger.hpp"
 
+#if BOOST_VERSION > 105300
+#define BOOST_MESSAGE(msg) BOOST_TEST_MESSAGE(msg)
+#endif
+
 enum ResultType
 {
 	Failed,
