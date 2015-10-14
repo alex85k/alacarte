@@ -140,14 +140,22 @@ configure_file("data/config/alacarte.conf.in" "${CMAKE_SOURCE_DIR}/data/config/a
 configure_file("tests/config.hpp.in" "${CMAKE_SOURCE_DIR}/tests/config.hpp")
 configure_file("include/config.hpp.in" "${CMAKE_SOURCE_DIR}/include/config.hpp")
 
-add_executable(alacarte-server      src/alacarte_server.cpp     ${server_sources}   ${alacarte_sources})
-add_executable(alacarte-importer    src/alacarte_importer.cpp   ${importer_sources} ${alacarte_sources})
+add_library(alacarte-obj OBJECT ${alacarte_sources})
+add_library(server-obj OBJECT ${server_sources})
 
-add_executable(unitTests_utils      EXCLUDE_FROM_ALL ${UnitTests_utils_sources} ${alacarte_sources} ${UnitTests_shared_sources})
-add_executable(unitTests_parser     EXCLUDE_FROM_ALL ${UnitTests_parser_sources} ${alacarte_sources} ${server_sources} ${UnitTests_shared_sources})
+add_executable(alacarte-server      src/alacarte_server.cpp     $<TARGET_OBJECTS:server-obj> $<TARGET_OBJECTS:alacarte-obj>)
+add_executable(alacarte-importer    src/alacarte_importer.cpp   ${importer_sources} $<TARGET_OBJECTS:alacarte-obj>)
+
+add_executable(unitTests_utils      EXCLUDE_FROM_ALL ${UnitTests_utils_sources} $<TARGET_OBJECTS:alacarte-obj> ${UnitTests_shared_sources})
+add_executable(unitTests_parser     EXCLUDE_FROM_ALL ${UnitTests_parser_sources} $<TARGET_OBJECTS:alacarte-obj> $<TARGET_OBJECTS:server-obj> ${UnitTests_shared_sources})
 add_executable(unitTests_general    EXCLUDE_FROM_ALL ${UnitTests_general_sources} ${alacarte_sources} ${UnitTests_shared_sources})
-add_executable(unitTests_importer   EXCLUDE_FROM_ALL ${UnitTests_importer_sources} ${UnitTests_shared_sources} ${importer_source} ${alacarte_sources})
-add_executable(unitTests_server     EXCLUDE_FROM_ALL ${UnitTests_server_sources} ${UnitTests_shared_sources} ${server_sources} ${alacarte_sources})
+add_executable(unitTests_importer   EXCLUDE_FROM_ALL ${UnitTests_importer_sources} ${UnitTests_shared_sources} $<TARGET_OBJECTS:alacarte-obj>)
+add_executable(unitTests_server     EXCLUDE_FROM_ALL ${UnitTests_server_sources} ${UnitTests_shared_sources} ${server_sources} $<TARGET_OBJECTS:alacarte-obj>)
+IF(GMOCK_FOUND)
+    add_executable(unitTests_mapcss EXCLUDE_FROM_ALL ${UnitTests_mapcss_sources} ${UnitTests_shared_sources} $<TARGET_OBJECTS:server-obj> $<TARGET_OBJECTS:alacarte-obj>)
+ENDIF(GMOCK_FOUND)
+add_executable(unitTests_eval       EXCLUDE_FROM_ALL ${UnitTests_eval_sources} ${UnitTests_shared_sources} $<TARGET_OBJECTS:server-obj> $<TARGET_OBJECTS:alacarte-obj>)
+
 
 IF(BUILD_TESTS)
    enable_testing()
