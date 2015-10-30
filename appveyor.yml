@@ -1,0 +1,53 @@
+environment:
+  global:
+    PREFIX: c:\libs
+  matrix:
+  - configuration: Debug
+
+# Operating system (build VM template)
+
+os: Visual Studio 2015
+
+services:
+#  - postgresql # enable when Postgis will be available
+
+# scripts that are called at very beginning, before repo cloning
+init:
+  - git config --global core.autocrlf input
+
+# clone directory
+clone_folder: c:\alacarte
+
+clone_depth: 1
+
+platform: x64
+
+install:
+  # by default, all script lines are interpreted as batch
+  - cd c:\
+  - mkdir libs
+  - curl -O https://dl.dropboxusercontent.com/u/63393258/libs_alacarte_%Configuration%.zip
+  - 7z x libs_alacarte_%Configuration%.zip | find ":"
+
+build_script:
+  - mkdir c:\alacarte\build
+  - cd c:\alacarte\build
+  - echo Running cmake...
+  - call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" amd64
+  - cmake .. -G "Visual Studio 14 2015 Win64" -DBOOST_ROOT=%PREFIX% -DCMAKE_BUILD_TYPE=%Configuration% -DCMAKE_INSTALL_PREFIX=%PREFIX% -DBoost_USE_STATIC_LIBS=ON -DBUILD_TESTING=ON -DBoost_ADDITIONAL_VERSIONS=1.57;1.58;1.59
+  - msbuild /p:Configuration=%Configuration% /p:BuildInParallel=false /clp:Verbosity=normal alacarte.sln
+  - 7z a c:\alacarte\osm2pgsql_%Configuration%.zip osm2pgsql-bin -tzip
+
+#test_script:
+#  - set PATH=c:\alacaosm2pgsql\build\osm2pgsql-bin;%PATH%
+#  - cd c:\osm2pgsql\build
+#  - ctest -VV -L NoDB
+#  - ctest -VV -LE FlatNodes # enable when Postgis will be available
+
+#deploy_script:
+#  - cd c:\build
+#  - curl -T osm2pgsql_%Configuration%.zip --user %ACCOUNT% https://webdav.yandex.ru/libs/osm2pgsql_%Configuration%.zip
+
+#artifacts:
+#  - path: alacarte_Release.zip
+#    name: osm2pgsql_Release.zip
